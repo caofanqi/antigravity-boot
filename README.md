@@ -2,6 +2,33 @@
 
 给 macOS 上的 Antigravity 和 Gemini 播放启动动画。启动器在播放视频的同时打开目标应用。Antigravity 的窗口在片尾逐渐显现，Gemini 的动画向窗口中央收拢。点击「跳过」、按 Esc 或 ⌘.，可以提前进入应用。
 
+## 让 AI 帮我安装
+
+在这台 Mac 上打开能操作本机终端的 AI 助手，把下面这句话完整发给它：
+
+> 请帮我把 https://github.com/caofanqi/antigravity-boot 安装到这台 Mac，按 README 安装带「经典版、水彩绘本、霓虹都市、换班」四款动画的版本，装好后打开启动器。如果 GitHub 访问不了，请改用 https://gitee.com/bobbycao/antigravity-boot 。需要我登录或确认系统安装时告诉我。
+
+**只发链接也可以。** 把 [GitHub 仓库](https://github.com/caofanqi/antigravity-boot) 或 [Gitee 仓库](https://gitee.com/bobbycao/antigravity-boot) 发给助手；如果它询问你想做什么，回复「帮我装到这台 Mac」。仓库设为私有期间，你的账号需要有其中一个仓库的读取权限。
+
+### 给执行安装的 AI
+
+1. 确认用户要安装到当前 Mac，系统为 macOS 13 或更高版本，并检查是否已安装 Antigravity 或 Gemini，至少需要其中一个。如果用户提供了本项目的录屏版 DMG，直接按下节安装；只有仓库链接时走源码构建。
+2. 检查 Git 和 Swift 编译器（`git --version`、`xcrun --find swiftc`）。缺少开发工具时，运行 `xcode-select --install`，请用户完成系统安装窗口后继续。
+3. 在新的临时目录中用 `git clone` 克隆用户所选的仓库，进入仓库根目录。私有仓库可使用用户已配置的 Git 凭据或 SSH。若两个地址都没有读取权限，提示用户申请访问或取得录屏版 DMG。
+4. 执行下列命令构建、安装并打开四款动画版。默认装在当前用户的「应用程序」目录，无需管理员权限。若目标路径已有同名应用，先核对它是否为本项目，再和用户确认更新。
+
+```sh
+set -e
+./build.sh demo
+install_app="$HOME/Applications/Antigravity Boot.app"
+mkdir -p "$HOME/Applications"
+ditto "build/Antigravity Boot.app" "$install_app"
+codesign --verify --strict --all-architectures "$install_app"
+open "$install_app"
+```
+
+5. 确认启动器实际打开，告诉用户安装位置。首次打开可选目标应用和动画；已启用直接启动时，按住 Option 打开即可回到选择窗口。
+
 ## 安装和使用
 
 1. 准备一台运行 macOS 13 或更高版本的 Mac，并安装 Antigravity 或 Gemini。安装包支持 Apple Silicon 和 Intel。
