@@ -1,8 +1,32 @@
 # Antigravity Boot
 
-给 macOS 上的 Antigravity 和 Gemini 播放启动动画。启动器在播放视频的同时打开目标应用。Antigravity 的窗口在片尾逐渐显现，Gemini 的动画向窗口中央收拢。点击「跳过」、按 Esc 或 ⌘.，可以提前进入应用。
+给 macOS 和 Windows 上的 Antigravity 和 Gemini 播放启动动画。
 
-## 让 AI 帮我安装
+**macOS**　启动器在播放视频的同时打开目标应用。Antigravity 的窗口在片尾逐渐显现，Gemini 的动画向窗口中央收拢。点击「跳过」、按 Esc 或 ⌘.，可以提前进入应用。
+
+## Windows 便携版
+
+适用于 Windows 10/11 x64，需要 .NET Framework 4.8 和系统媒体播放组件。
+
+1. 登录仓库后，下载 [Windows x64 便携包](downloads/Antigravity-Boot-Windows-x64.zip)（文件页点 Download 或「下载」）。完整解压 ZIP 到一个固定文件夹，双击里面的 **Antigravity Boot.exe**。也可以给这个 EXE 创建桌面快捷方式。
+2. 选 **Gemini** 或 **Antigravity**，再选经典版、水彩绘本、霓虹都市或换班，点「启动」。启动器分别记住两个目标上次使用的动画。
+3. Antigravity 使用本机客户端。若自动查找失败，在文件选择框里找到安装目录下的 `Antigravity.exe`。Gemini 优先使用可识别的 `Gemini.exe`，找不到时用 Microsoft Edge 打开独立的 Gemini 网页窗口。该窗口使用单独的浏览器资料，首次使用可能需要登录，后续会保留登录状态。
+4. 动画末尾会对齐检测到的目标窗口并在约 1.25 秒内淡出。应用打开较慢时，动画会在片尾最多等待 10 秒；随时可按 **Esc** 或点「跳过」。仅打开这个启动器时播放动画。
+
+**让 AI 帮我装到 Windows**，可以复制下面这句：
+
+> 请帮我在这台 Windows 电脑安装 Antigravity Boot。仓库是 https://github.com/caofanqi/antigravity-boot ，备用地址是 https://gitee.com/bobbycao/antigravity-boot 。请从仓库的 downloads 目录下载 Windows x64 便携 ZIP，或使用我提供的 ZIP，完整解压后运行。装好后打开目标与动画选择窗口。
+
+**从源码打包**，在安装了 .NET 8 SDK 的机器上，从仓库根目录执行以下命令。首次构建会从 NuGet 获取微软 .NET Framework 4.8 参考程序集。
+
+```sh
+dotnet restore Windows/AntigravityBoot.csproj
+dotnet msbuild Windows/AntigravityBoot.csproj -t:PackageWindows -p:Configuration=Release
+```
+
+生成的便携包位于 `dist/Antigravity-Boot-Windows-x64.zip`。包内附有四段动画的使用说明。
+
+## 让 AI 帮我安装到 Mac
 
 在这台 Mac 上打开能操作本机终端的 AI 助手，把下面这句话完整发给它：
 
