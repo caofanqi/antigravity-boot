@@ -32,7 +32,7 @@ open "build/public/Antigravity Boot.app"
 
 ## 媒体与许可
 
-代码、脚本、自制图标和原创星轨动画使用 [MIT 许可证](LICENSE)。星轨由几何轨道、光点和中心星组成。启动器的构想参考 [Dragon Codex Boot](https://github.com/yushua0808-cpu/dragon-codex-boot)。
+代码、脚本、自制图标和原创星轨动画使用 [MIT 许可证](LICENSE)。星轨由几何轨道、光点和中心星组成。
 
 本机录屏版支持经典版、水彩绘本、霓虹都市和换班四段角色动画。角色立绘、参考图和录屏版动画单独管理。自行构建这一版时，将有权使用的四段 MP4 放在 `Media/Presets/`，依次命名为 `gemini-classic.mp4`、`gemini-watercolor.mp4`、`gemini-neon.mp4`、`gemini-switch-team.mp4`，再运行 `./package.sh demo`。
 
