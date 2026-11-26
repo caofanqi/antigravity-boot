@@ -2,6 +2,10 @@
 
 给 macOS 和 Windows 上的 Antigravity 和 Gemini 播放启动动画。
 
+**下载 v1.0.0**　[GitHub Release](https://github.com/caofanqi/antigravity-boot/releases/tag/v1.0.0) · [Gitee 发行版](https://gitee.com/bobbycao/antigravity-boot/releases/tag/v1.0.0)
+
+登录有仓库权限的账号，在发行页附件中选择 Windows x64 的 ZIP 或 Mac 的通用 DMG（Apple Silicon 和 Intel）。两款均内置四段角色动画。
+
 **macOS**　启动器在播放视频的同时打开目标应用。Antigravity 的窗口在片尾逐渐显现，Gemini 的动画向窗口中央收拢。点击「跳过」、按 Esc 或 ⌘.，可以提前进入应用。
 
 ## Windows 便携版
