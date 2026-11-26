@@ -23,6 +23,7 @@ xcrun lipo -create "$tmp/Boot-arm64" "$tmp/Boot-x86_64" -output "$contents/MacOS
 cp Info.plist "$contents/"
 cp Boot.icns LICENSE "$contents/Resources/"
 if [[ "$mode" == demo ]]; then
+  cp Media/ANIMATION_NOTICE.md "$contents/Resources/"
   for name in gemini-classic gemini-watercolor gemini-neon gemini-switch-team; do
     cp "Media/Presets/$name.mp4" "$contents/Resources/"
   done

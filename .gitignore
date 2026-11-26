@@ -1,6 +1,10 @@
 /build/
 /dist/
 /创作/
-/Media/Presets/
+/Media/Presets/*
+!/Media/Presets/gemini-classic.mp4
+!/Media/Presets/gemini-watercolor.mp4
+!/Media/Presets/gemini-neon.mp4
+!/Media/Presets/gemini-switch-team.mp4
 .DS_Store
 !Media/orbit.mp4

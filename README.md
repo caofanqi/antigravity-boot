@@ -34,7 +34,9 @@ open "build/public/Antigravity Boot.app"
 
 代码、脚本、自制图标和原创星轨动画使用 [MIT 许可证](LICENSE)。星轨由几何轨道、光点和中心星组成。
 
-本机录屏版支持经典版、水彩绘本、霓虹都市和换班四段角色动画。角色立绘、参考图和录屏版动画单独管理。自行构建这一版时，将有权使用的四段 MP4 放在 `Media/Presets/`，依次命名为 `gemini-classic.mp4`、`gemini-watercolor.mp4`、`gemini-neon.mp4`、`gemini-switch-team.mp4`，再运行 `./package.sh demo`。
+录屏版内置经典版、水彩绘本、霓虹都市和换班四段角色动画。**这四段动画不开源，不适用 MIT 许可证，禁止商业使用。** 个人可用它们体验启动器或进行本项目的非商业演示。分享含动画的完整项目或安装包时，请保留[随附角色动画使用说明](Media/ANIMATION_NOTICE.md)。
+
+从含有四段 MP4 的仓库检出后，运行 `./package.sh demo` 即可构建录屏版。
 
 ## 窗口交接
 
