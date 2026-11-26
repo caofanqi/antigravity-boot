@@ -1,0 +1,6 @@
+/build/
+/dist/
+/创作/
+/Media/Presets/
+.DS_Store
+!Media/orbit.mp4
