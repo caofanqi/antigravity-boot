@@ -27,6 +27,17 @@
 | 小红书 | [波子哥 · 1140612912](https://www.xiaohongshu.com/user/profile/609b1a310000000001006e90) | [查看二维码](docs/social/xiaohongshu.jpg) |
 | 快手 | [波子哥 · 2319178813](https://v.kuaishou.com/f/YgB4QAlJD) | [查看二维码](docs/social/kuaishou.jpg) |
 
+### ☕ 请波子哥喝杯咖啡
+
+开源不易，支持一杯咖啡，给牛马上上动力！
+
+<details>
+<summary>查看微信赞赏码</summary>
+
+<img src="docs/social/wechat-tip.png" width="240" alt="波子哥的微信赞赏码">
+
+</details>
+
 ## Windows 便携版
 
 适用于 Windows 10/11 x64，需要 .NET Framework 4.8 和系统媒体播放组件。
