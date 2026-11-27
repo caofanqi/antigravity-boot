@@ -17,7 +17,8 @@
     <Reference Include="WindowsBase" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Management" />
-    <None Include="../Media/Presets/gemini-classic.mp4;../Media/Presets/gemini-watercolor.mp4;../Media/Presets/gemini-neon.mp4;../Media/Presets/gemini-switch-team.mp4" Link="Media/Presets/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../Media/Presets/gemini-classic.mp4;../Media/Presets/gemini-watercolor.mp4;../Media/Presets/gemini-neon.mp4;../Media/Presets/gemini-switch-team.mp4;../Media/Presets/gemini-stargate.mp4" Link="Media/Presets/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../docs/social/douyin.png" Link="Media/douyin.png" CopyToOutputDirectory="PreserveNewest" />
     <None Include="../Media/ANIMATION_NOTICE.md" Link="Media/ANIMATION_NOTICE.md" CopyToOutputDirectory="PreserveNewest" />
     <None Include="../LICENSE" Link="LICENSE" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>

@@ -7,19 +7,23 @@ using System.Windows.Controls;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Effects;
+using System.Windows.Media.Imaging;
+using Ellipse = System.Windows.Shapes.Ellipse;
+using System.Windows.Automation;
 using System.Windows.Threading;
 using Microsoft.Win32;
 
 namespace AntigravityBoot {
     internal class Launcher : Window {
-        static readonly string[] Names = { "经典版", "水彩绘本", "霓虹都市", "换班" };
-        static readonly string[] Files = { "gemini-classic", "gemini-watercolor", "gemini-neon", "gemini-switch-team" };
+        // Saved per-app registry indices follow this order. Append new presets at the end.
+        static readonly string[] Names = { "经典版", "水彩绘本", "霓虹都市", "换班", "星门回眸" };
+        static readonly string[] Files = { "gemini-classic", "gemini-watercolor", "gemini-neon", "gemini-switch-team", "gemini-stargate" };
         const string Key = @"Software\Antigravity Boot";
         readonly ComboBox apps = new ComboBox { ItemsSource = new[] { "Gemini", "Antigravity" } };
         readonly ComboBox movies = new ComboBox { ItemsSource = Names };
         internal Launcher() {
             Title = "Antigravity Boot";
-            Width = 360; SizeToContent = SizeToContent.Height;
+            Width = 432; SizeToContent = SizeToContent.Height;
             WindowStartupLocation = WindowStartupLocation.CenterScreen;
             ResizeMode = ResizeMode.CanMinimize;
             var panel = new StackPanel { Margin = new Thickness(26) };
@@ -27,7 +31,17 @@ namespace AntigravityBoot {
             panel.Children.Add(new Label { Content = "目标应用" });
             panel.Children.Add(apps);
             panel.Children.Add(new Label { Content = "启动动画", Margin = new Thickness(0,12,0,0) });
-            panel.Children.Add(movies);
+            var movieRow = new DockPanel();
+            var preview = new Button { Content = "预览动画", Padding = new Thickness(10,3,10,3), Margin = new Thickness(8,0,0,0) };
+            DockPanel.SetDock(preview, Dock.Right);
+            movieRow.Children.Add(preview);
+            movieRow.Children.Add(movies);
+            panel.Children.Add(movieRow);
+            panel.Children.Add(CreatorButton());
+            preview.Click += delegate {
+                try { PreviewMovie(SelectedMovie()); }
+                catch (Exception ex) { MessageBox.Show(this, ex.Message, Title); }
+            };
             var start = new Button { Content = "启动", IsDefault = true, Height = 34, Margin = new Thickness(0,22,0,0) };
             panel.Children.Add(start);
             apps.SelectionChanged += delegate { movies.SelectedIndex = ReadIndex((string)apps.SelectedItem, Names.Length); };
@@ -35,8 +49,7 @@ namespace AntigravityBoot {
             start.Click += delegate {
                 try {
                     var name = (string)apps.SelectedItem;
-                    var movie = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Media", "Presets", Files[movies.SelectedIndex] + ".mp4");
-                    if (!File.Exists(movie)) throw new FileNotFoundException("缺少动画，请完整解压 ZIP 后再启动。", movie);
+                    var movie = SelectedMovie();
                     var target = Target.Resolve(name);
                     if (target == null) return;
                     using (var key = Registry.CurrentUser.CreateSubKey(Key)) {
@@ -50,6 +63,104 @@ namespace AntigravityBoot {
                 } catch (Exception ex) { MessageBox.Show(this, ex.Message, Title); }
             };
         }
+        string SelectedMovie() {
+            var file = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Media", "Presets", Files[movies.SelectedIndex] + ".mp4");
+            if (!File.Exists(file)) throw new FileNotFoundException("缺少动画，请完整解压 ZIP 后再启动。", file);
+            return file;
+        }
+
+        Window Dialog(string title, double width) {
+            return new Window { Owner = this, Title = title, Width = Math.Min(width, SystemParameters.WorkArea.Width),
+                SizeToContent = SizeToContent.Height, WindowStartupLocation = WindowStartupLocation.CenterOwner,
+                ResizeMode = ResizeMode.NoResize, ShowInTaskbar = false };
+        }
+
+        void PreviewMovie(string file) {
+            var dialog = Dialog("预览 · " + movies.SelectedItem, 580);
+            var video = new MediaElement { LoadedBehavior = MediaState.Manual, Stretch = Stretch.Uniform,
+                Height = Math.Min(dialog.Width * 9 / 16, SystemParameters.WorkArea.Height * .62) };
+            var root = new StackPanel();
+            root.Children.Add(new Border { Background = Brushes.Black, Child = video });
+            var bar = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right,
+                Margin = new Thickness(12) };
+            var toggle = new Button { Content = "暂停", MinWidth = 76, Height = 30 };
+            var back = new Button { Content = "返回设置", IsCancel = true, MinWidth = 86, Margin = new Thickness(8,0,0,0) };
+            bar.Children.Add(toggle);
+            bar.Children.Add(back);
+            root.Children.Add(bar);
+            dialog.Content = root;
+            bool playing = true, ended = false;
+            toggle.Click += delegate {
+                if (playing) video.Pause();
+                else {
+                    if (ended) video.Position = TimeSpan.Zero;
+                    ended = false;
+                    video.Play();
+                }
+                playing = !playing;
+                toggle.Content = playing ? "暂停" : "继续播放";
+            };
+            video.MediaEnded += delegate { ended = true; playing = false; toggle.Content = "重新播放"; };
+            video.MediaFailed += delegate {
+                if (dialog.IsVisible) {
+                    MessageBox.Show(dialog, "无法预览，请检查系统媒体组件和随包 MP4。", dialog.Title);
+                    dialog.Close();
+                }
+            };
+            dialog.Loaded += delegate { video.Source = new Uri(file); video.Play(); };
+            dialog.Closed += delegate { video.Close(); };
+            dialog.ShowDialog();
+        }
+
+        Button CreatorButton() {
+            var file = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Media", "douyin.png");
+            var row = new DockPanel { LastChildFill = true };
+            if (File.Exists(file)) {
+                var card = new BitmapImage(new Uri(file));
+                // Only the raccoon portrait from the official card is visible in settings.
+                var portrait = new CroppedBitmap(card, new Int32Rect(460, 500, 296, 296));
+                row.Children.Add(new Ellipse { Width = 36, Height = 36, Margin = new Thickness(0,0,10,0),
+                    Fill = new ImageBrush(portrait) });
+            }
+            var action = new TextBlock { Text = "去支持一下  ›", Foreground = SystemColors.HotTrackBrush,
+                VerticalAlignment = VerticalAlignment.Center };
+            DockPanel.SetDock(action, Dock.Right);
+            row.Children.Add(action);
+            row.Children.Add(new TextBlock { Text = "波子哥 开源", FontSize = 16, FontWeight = FontWeights.SemiBold,
+                VerticalAlignment = VerticalAlignment.Center });
+            var button = new Button { Content = row, HorizontalContentAlignment = HorizontalAlignment.Stretch,
+                Background = SystemColors.WindowBrush, BorderBrush = SystemColors.ControlLightBrush,
+                Cursor = System.Windows.Input.Cursors.Hand, Padding = new Thickness(12,0,12,0),
+                Height = 54, Margin = new Thickness(0,18,0,0) };
+            AutomationProperties.SetName(button, "波子哥 开源 · 去支持一下");
+            button.Click += delegate {
+                try { ShowCreator(file); }
+                catch (Exception ex) { MessageBox.Show(this, ex.Message, Title); }
+            };
+            return button;
+        }
+
+        void ShowCreator(string file) {
+            var dialog = Dialog("波子哥 开源", 400);
+            var root = new StackPanel { Margin = new Thickness(18) };
+            root.Children.Add(new TextBlock { Text = "开源不易，喜欢这个启动器的话，来抖音关注支持一下。\n抖音号：BobbyCao",
+                TextWrapping = TextWrapping.Wrap });
+            if (File.Exists(file)) root.Children.Add(new Image { Source = new BitmapImage(new Uri(file)),
+                Stretch = Stretch.Uniform, Height = Math.Min(390, SystemParameters.WorkArea.Height * .57), Margin = new Thickness(0,12,0,12) });
+            var bar = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Center };
+            var open = new Button { Content = "打开抖音主页", Padding = new Thickness(12,5,12,5) };
+            open.Click += delegate {
+                try { Process.Start(new ProcessStartInfo("https://www.douyin.com/user/MS4wLjABAAAAqfTLdIWYEIvollbyqL6yeU2anTbgSXkD_2-N-FNuztk") { UseShellExecute = true }); }
+                catch (Exception ex) { MessageBox.Show(dialog, ex.Message, dialog.Title); }
+            };
+            bar.Children.Add(open);
+            bar.Children.Add(new Button { Content = "返回设置", IsCancel = true,
+                Padding = new Thickness(12,5,12,5), Margin = new Thickness(8,0,0,0) });
+            root.Children.Add(bar);
+            dialog.Content = root;
+            dialog.ShowDialog();
+        }
+
         static int ReadIndex(string field, int count) {
             using (var key = Registry.CurrentUser.OpenSubKey(Key)) {
                 var value = key == null ? null : key.GetValue(field);

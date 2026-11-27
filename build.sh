@@ -18,13 +18,16 @@ contents="$app/Contents"
 mkdir -p "$contents/MacOS" "$contents/Resources"
 for arch in arm64 x86_64; do
   xcrun swiftc -O -target "${arch}-apple-macos13.0" -module-cache-path "${TMPDIR:-/tmp}/antigravity-boot-swift-cache" main.swift -o "$tmp/Boot-$arch"
+  xcrun swiftc -O -target "${arch}-apple-macos13.0" -module-cache-path "${TMPDIR:-/tmp}/antigravity-boot-swift-cache" BootObserver.swift -o "$tmp/Observer-$arch"
 done
+xcrun lipo -create "$tmp/Observer-arm64" "$tmp/Observer-x86_64" -output "$contents/MacOS/BootObserver"
+codesign --force --sign - "$contents/MacOS/BootObserver"
 xcrun lipo -create "$tmp/Boot-arm64" "$tmp/Boot-x86_64" -output "$contents/MacOS/Boot"
 cp Info.plist "$contents/"
-cp Boot.icns LICENSE "$contents/Resources/"
+cp Boot.icns LICENSE docs/social/douyin.png "$contents/Resources/"
 if [[ "$mode" == demo ]]; then
   cp Media/ANIMATION_NOTICE.md "$contents/Resources/"
-  for name in gemini-classic gemini-watercolor gemini-neon gemini-switch-team; do
+  for name in gemini-classic gemini-watercolor gemini-neon gemini-switch-team gemini-stargate; do
     cp "Media/Presets/$name.mp4" "$contents/Resources/"
   done
 else

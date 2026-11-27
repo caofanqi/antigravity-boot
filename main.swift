@@ -1,10 +1,65 @@
 import AppKit
+import AVKit
 import AVFoundation
 import CoreImage
 import UniformTypeIdentifiers
 
 final class PlayerWindow: NSWindow {
     override var canBecomeKey: Bool { true }
+}
+
+final class CreatorButton: NSButton {
+    private let card = Bundle.main.url(forResource: "douyin", withExtension: "png").flatMap(NSImage.init(contentsOf:))
+    override var isFlipped: Bool { true }
+
+    override func resetCursorRects() {
+        super.resetCursorRects()
+        addCursorRect(bounds, cursor: .pointingHand)
+    }
+
+    override func draw(_ dirtyRect: NSRect) {
+        let surface = NSBezierPath(roundedRect: bounds.insetBy(dx: 1, dy: 1), xRadius: 12, yRadius: 12)
+        NSColor.controlBackgroundColor.setFill()
+        surface.fill()
+        if isHighlighted {
+            NSColor.selectedContentBackgroundColor.withAlphaComponent(0.12).setFill()
+            surface.fill()
+        }
+        NSColor.separatorColor.setStroke()
+        surface.stroke()
+
+        let portrait = NSRect(x: 13, y: bounds.midY - 18, width: 36, height: 36)
+        if let card {
+            // The circular portrait at the centre of the official Douyin card.
+            let size = card.size
+            let source = NSRect(x: size.width * 0.375, y: size.height * 0.557,
+                                width: size.width * 0.25, height: size.height * 0.1675)
+            NSGraphicsContext.saveGraphicsState()
+            NSBezierPath(ovalIn: portrait).addClip()
+            card.draw(in: portrait, from: source, operation: .sourceOver, fraction: 1,
+                      respectFlipped: true, hints: [.interpolation: NSImageInterpolation.high.rawValue])
+            NSGraphicsContext.restoreGraphicsState()
+        }
+        let nameStyle: [NSAttributedString.Key: Any] = [
+            .font: NSFont.systemFont(ofSize: 16, weight: .semibold), .foregroundColor: NSColor.labelColor]
+        let actionStyle: [NSAttributedString.Key: Any] = [
+            .font: NSFont.systemFont(ofSize: 13, weight: .medium), .foregroundColor: NSColor.controlAccentColor]
+        let name = title as NSString
+        let action = "去支持一下" as NSString
+        let nameSize = name.size(withAttributes: nameStyle)
+        let actionSize = action.size(withAttributes: actionStyle)
+        name.draw(at: NSPoint(x: 59, y: (bounds.height - nameSize.height) / 2), withAttributes: nameStyle)
+        action.draw(at: NSPoint(x: bounds.width - actionSize.width - 29,
+                                y: (bounds.height - actionSize.height) / 2), withAttributes: actionStyle)
+        let chevron = NSBezierPath()
+        chevron.move(to: NSPoint(x: bounds.width - 20, y: bounds.midY - 4))
+        chevron.line(to: NSPoint(x: bounds.width - 16, y: bounds.midY))
+        chevron.line(to: NSPoint(x: bounds.width - 20, y: bounds.midY + 4))
+        chevron.lineWidth = 1.6
+        chevron.lineJoinStyle = .round
+        NSColor.controlAccentColor.setStroke()
+        chevron.stroke()
+    }
 }
 
 final class Launcher: NSObject, NSApplicationDelegate {
@@ -17,9 +72,11 @@ final class Launcher: NSObject, NSApplicationDelegate {
         ("水彩绘本", "gemini-watercolor"),
         ("霓虹都市", "gemini-neon"),
         ("换班", "gemini-switch-team"),
+        ("星门回眸", "gemini-stargate"),
         ("星轨", "orbit")
     ].filter { Bundle.main.url(forResource: $0.1, withExtension: "mp4") != nil }
     let movieMenu = NSPopUpButton()
+    let originalLaunch = NSButton(checkboxWithTitle: "从原 App 启动时播放动画", target: nil, action: nil)
     var window: NSWindow?
     var skipPanel: NSPanel?
     var player: AVPlayer?
@@ -32,6 +89,17 @@ final class Launcher: NSObject, NSApplicationDelegate {
     var launchPending = false
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        let args = CommandLine.arguments
+        if let index = args.firstIndex(of: "--handoff") {
+            guard args.indices.contains(index + 1), let pid = Int32(args[index + 1]),
+                  let app = NSRunningApplication(processIdentifier: pid),
+                  let id = app.bundleIdentifier, supportedIDs.contains(id),
+                  preferences.bool(forKey: "original." + id) else { NSApp.terminate(nil); return }
+            NSApp.activate(ignoringOtherApps: true)
+            target = app
+            playMovie(for: id)
+            return
+        }
         NSApp.activate(ignoringOtherApps: true)
         let saved = preferences.string(forKey: "target").map(URL.init(fileURLWithPath:))
         if let legacy = preferences.string(forKey: "movie"),
@@ -40,12 +108,61 @@ final class Launcher: NSObject, NSApplicationDelegate {
             if preferences.string(forKey: key) == nil { preferences.set(legacy, forKey: key) }
             preferences.removeObject(forKey: "movie")
         }
-        let configure = NSEvent.modifierFlags.contains(.option)
+        let configure = NSEvent.modifierFlags.contains(.option) || args.contains("--settings")
         if preferences.bool(forKey: "remember"), !configure, let saved, validApp(saved) {
             start(saved)
         } else {
             settings(saved)
         }
+    }
+
+    func saveOriginalLaunch(_ enabled: Bool, for id: String) throws {
+        let needsObserver = enabled || supportedIDs.contains { $0 != id && preferences.bool(forKey: "original." + $0) }
+        let label = "io.github.bozi.antigravity-boot.observer"
+        let domain = "gui/\(getuid())"
+        let service = domain + "/" + label
+        let fm = FileManager.default
+        let folder = try fm.url(for: .libraryDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
+            .appendingPathComponent("LaunchAgents", isDirectory: true)
+        let plist = folder.appendingPathComponent(label + ".plist")
+
+        func launchctl(_ arguments: [String]) throws -> Int32 {
+            let task = Process()
+            task.executableURL = URL(fileURLWithPath: "/bin/launchctl")
+            task.arguments = arguments
+            task.standardOutput = FileHandle.nullDevice
+            try task.run()
+            task.waitUntilExit()
+            return task.terminationStatus
+        }
+
+        if needsObserver {
+            let helper = Bundle.main.bundleURL.appendingPathComponent("Contents/MacOS/BootObserver")
+            let config: [String: Any] = ["Label": label, "ProgramArguments": [helper.path], "RunAtLoad": true,
+                                        "LimitLoadToSessionType": "Aqua", "AssociatedBundleIdentifiers": [Bundle.main.bundleIdentifier!]]
+            let data = try PropertyListSerialization.data(fromPropertyList: config, format: .xml, options: 0)
+            let changed = (try? Data(contentsOf: plist)) != data
+            let loaded = try launchctl(["print", service]) == 0
+            if changed {
+                try fm.createDirectory(at: folder, withIntermediateDirectories: true)
+                try data.write(to: plist, options: .atomic)
+            }
+            if changed && loaded { guard try launchctl(["bootout", service]) == 0 else { throw observerError() } }
+            if changed || !loaded {
+                guard try launchctl(["bootstrap", domain, plist.path]) == 0 else { throw observerError() }
+            }
+        } else if fm.fileExists(atPath: plist.path) {
+            if try launchctl(["print", service]) == 0 {
+                guard try launchctl(["bootout", service]) == 0 else { throw observerError() }
+            }
+            try fm.removeItem(at: plist)
+        }
+        preferences.set(enabled, forKey: "original." + id)
+    }
+
+    func observerError() -> NSError {
+        NSError(domain: "AntigravityBoot", code: 1, userInfo: [NSLocalizedDescriptionKey:
+            "请确认启动器已安装，并在系统设置的「登录项」中允许后台运行，然后重试。"])
     }
 
     func validApp(_ url: URL) -> Bool {
@@ -76,6 +193,7 @@ final class Launcher: NSObject, NSApplicationDelegate {
         alert.informativeText = "记住选择后，按住 ⌥ Option 打开启动器可更改设置。"
         alert.addButton(withTitle: "启动")
         alert.addButton(withTitle: "取消")
+        alert.addButton(withTitle: "仅保存")
         let appMenu = NSPopUpButton()
         appMenu.addItems(withTitles: apps.map { $0.deletingPathExtension().lastPathComponent })
         if let saved, let index = apps.firstIndex(of: saved) { appMenu.selectItem(at: index) }
@@ -87,17 +205,42 @@ final class Launcher: NSObject, NSApplicationDelegate {
         refreshMovies(appMenu)
         let remember = NSButton(checkboxWithTitle: "以后直接启动选中的应用", target: nil, action: nil)
         remember.state = preferences.bool(forKey: "remember") ? .on : .off
+        let preview = NSButton(title: "预览动画", target: self, action: #selector(previewMovie))
+        originalLaunch.toolTip = "在所选 App 完全退出后，下次启动时播放。需要允许后台运行。"
+        let creator = CreatorButton(title: "波子哥 开源", target: self, action: #selector(showCreator))
+        creator.isBordered = false
+        creator.setAccessibilityLabel("波子哥 开源")
+        creator.toolTip = "查看抖音主页和二维码"
+        creator.setAccessibilityHelp("去支持一下，查看波子哥的抖音名片")
+        creator.heightAnchor.constraint(equalToConstant: 54).isActive = true
+        let movieRow = NSStackView(views: [movieMenu, preview])
+        movieRow.spacing = 8
+        movieMenu.setContentHuggingPriority(.defaultLow, for: .horizontal)
         let controls = NSStackView(views: [
             NSTextField(labelWithString: "目标应用"), appMenu,
-            NSTextField(labelWithString: "启动动画"), movieMenu, remember
+            NSTextField(labelWithString: "启动动画"), movieRow, originalLaunch, remember, creator
         ])
         controls.orientation = .vertical
         controls.alignment = .leading
         controls.spacing = 6
-        controls.frame = NSRect(x: 0, y: 0, width: 300, height: 150)
-        for menu in [appMenu, movieMenu] { menu.widthAnchor.constraint(equalToConstant: 295).isActive = true }
-        alert.accessoryView = controls
-        while alert.runModal() == .alertFirstButtonReturn {
+        controls.setCustomSpacing(12, after: appMenu)
+        controls.setCustomSpacing(12, after: movieRow)
+        controls.setCustomSpacing(14, after: remember)
+        let form = NSView(frame: NSRect(x: 0, y: 0, width: 396, height: 228))
+        controls.translatesAutoresizingMaskIntoConstraints = false
+        form.addSubview(controls)
+        NSLayoutConstraint.activate([
+            controls.leadingAnchor.constraint(equalTo: form.leadingAnchor, constant: 12),
+            controls.trailingAnchor.constraint(equalTo: form.trailingAnchor, constant: -12),
+            controls.centerYAnchor.constraint(equalTo: form.centerYAnchor)
+        ])
+        for view in [appMenu as NSView, movieRow, creator] {
+            view.widthAnchor.constraint(equalTo: controls.widthAnchor).isActive = true
+        }
+        alert.accessoryView = form
+        while true {
+            let response = alert.runModal()
+            guard response == .alertFirstButtonReturn || response == .alertThirdButtonReturn else { break }
             let chosen = apps[appMenu.indexOfSelectedItem]
             guard validApp(chosen) else { message("所选应用已不可用，请重新打开启动器。"); break }
             guard let id = appMenu.selectedItem?.representedObject as? String,
@@ -106,9 +249,12 @@ final class Launcher: NSObject, NSApplicationDelegate {
                 guard let file = pickMovie() else { continue }
                 selection = file.path
             }
+            do { try saveOriginalLaunch(originalLaunch.state == .on, for: id) }
+            catch { message("无法更新后台启动设置：\(error.localizedDescription)"); continue }
             preferences.set(selection, forKey: "movie." + id)
             preferences.set(chosen.path, forKey: "target")
             preferences.set(remember.state == .on, forKey: "remember")
+            if response == .alertThirdButtonReturn { break }
             start(chosen)
             return
         }
@@ -126,6 +272,7 @@ final class Launcher: NSObject, NSApplicationDelegate {
 
     @objc func refreshMovies(_ sender: NSPopUpButton) {
         guard let id = sender.selectedItem?.representedObject as? String else { return }
+        originalLaunch.state = preferences.bool(forKey: "original." + id) ? .on : .off
         let selection = movieSelection(for: id)
         var choices = builtInMovies
         if selection.hasPrefix("/") {
@@ -149,10 +296,6 @@ final class Launcher: NSObject, NSApplicationDelegate {
 
     func start(_ url: URL) {
         guard let id = Bundle(url: url)?.bundleIdentifier else { return }
-        let selection = movieSelection(for: id)
-        let movie = selection.hasPrefix("/")
-            ? URL(fileURLWithPath: selection)
-            : Bundle.main.url(forResource: selection, withExtension: "mp4")
         let configuration = NSWorkspace.OpenConfiguration()
         configuration.activates = false
         launchPending = true
@@ -171,7 +314,52 @@ final class Launcher: NSObject, NSApplicationDelegate {
                 if self.finished { self.handoff() }
             }
         }
-        guard let movie else { finish(); return }
+        playMovie(for: id)
+    }
+
+    func movieURL(_ selection: String) -> URL? {
+        selection.hasPrefix("/") ? URL(fileURLWithPath: selection)
+            : Bundle.main.url(forResource: selection, withExtension: "mp4")
+    }
+
+    @objc func showCreator() {
+        let url = URL(string: "https://www.douyin.com/user/MS4wLjABAAAAqfTLdIWYEIvollbyqL6yeU2anTbgSXkD_2-N-FNuztk")!
+        let alert = NSAlert()
+        alert.messageText = "波子哥 开源"
+        alert.informativeText = "开源不易，喜欢这个启动器的话，来抖音关注支持一下。\n抖音号：BobbyCao"
+        if let file = Bundle.main.url(forResource: "douyin", withExtension: "png"),
+           let image = NSImage(contentsOf: file) {
+            let view = NSImageView(frame: NSRect(x: 0, y: 0, width: 290, height: 390))
+            view.image = image
+            view.imageScaling = .scaleProportionallyUpOrDown
+            view.setAccessibilityLabel("波子哥的抖音主页二维码")
+            alert.accessoryView = view
+        }
+        alert.addButton(withTitle: "打开抖音主页")
+        alert.addButton(withTitle: "返回设置")
+        if alert.runModal() == .alertFirstButtonReturn { workspace.open(url) }
+    }
+
+    @objc func previewMovie() {
+        guard let item = movieMenu.selectedItem, let selection = item.representedObject as? String else { return }
+        let url = selection == "browse" ? pickMovie() : movieURL(selection)
+        guard let url else { return }
+        let video = AVPlayer(url: url)
+        let view = AVPlayerView(frame: NSRect(x: 0, y: 0, width: 512, height: 288))
+        view.controlsStyle = .inline
+        view.player = video
+        let preview = NSAlert()
+        preview.messageText = "预览 · " + (selection == "browse" ? url.lastPathComponent : item.title)
+        preview.accessoryView = view
+        preview.addButton(withTitle: "返回设置")
+        video.play()
+        preview.runModal()
+        video.pause()
+        view.player = nil
+    }
+
+    func playMovie(for id: String) {
+        guard let movie = movieURL(movieSelection(for: id)) else { finish(); return }
         let screen = NSScreen.screens.first(where: { $0.frame.contains(NSEvent.mouseLocation) }) ?? NSScreen.main
         let area = screen?.visibleFrame ?? NSRect(x: 0, y: 0, width: 1200, height: 800)
         let width = min(1024, area.width * 0.84, area.height * 0.84 * 16 / 9)
