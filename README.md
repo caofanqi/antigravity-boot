@@ -8,6 +8,23 @@
 
 **macOS**　启动器在播放视频的同时打开目标应用。Antigravity 的窗口在片尾逐渐显现，Gemini 的动画向窗口中央收拢。点击「跳过」、按 Esc 或 ⌘.，可以提前进入应用。
 
+## 波子哥 开源
+
+开源不易，喜欢这个启动器的话，来抖音关注支持一下。**[抖音 · 波子哥（BobbyCao）](https://www.douyin.com/user/MS4wLjABAAAAqfTLdIWYEIvollbyqL6yeU2anTbgSXkD_2-N-FNuztk)**
+
+<details>
+<summary>查看抖音二维码</summary>
+
+<img src="docs/social/douyin.png" width="240" alt="波子哥的抖音主页二维码">
+
+</details>
+
+| 平台 | 主页 | 二维码名片 |
+| --- | --- | --- |
+| B 站 | [波子哥Bobby](https://b23.tv/X2NEjU0) | [查看二维码](docs/social/bilibili.png) |
+| 小红书 | [波子哥 · 1140612912](https://www.xiaohongshu.com/user/profile/609b1a310000000001006e90) | [查看二维码](docs/social/xiaohongshu.jpg) |
+| 快手 | [波子哥 · 2319178813](https://v.kuaishou.com/f/YgB4QAlJD) | [查看二维码](docs/social/kuaishou.jpg) |
+
 ## Windows 便携版
 
 适用于 Windows 10/11 x64，需要 .NET Framework 4.8 和系统媒体播放组件。
