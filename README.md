@@ -2,7 +2,9 @@
 
 给 macOS 和 Windows 上的 Antigravity 和 Gemini 播放启动动画。
 
-**下载五款动画版**　[Mac 通用 DMG](downloads/Antigravity-Boot-macOS-universal.dmg) · [Windows x64 便携 ZIP](downloads/Antigravity-Boot-Windows-x64.zip)
+**下载 v1.1.0 · 五款动画版**　[GitHub Release](https://github.com/caofanqi/antigravity-boot/releases/tag/v1.1.0) · [Gitee 发行版](https://gitee.com/bobbycao/antigravity-boot/releases/tag/v1.1.0)
+
+在发行页附件中选择 Mac 通用 DMG（Apple Silicon 和 Intel）或 Windows x64 便携 ZIP。
 
 本版包含经典版、水彩绘本、霓虹都市、换班和 10 秒静音版「星门回眸」。两个平台都可以在启动前预览动画。此前的四款动画版仍可在 [GitHub Release](https://github.com/caofanqi/antigravity-boot/releases/tag/v1.0.0) 或 [Gitee 发行版](https://gitee.com/bobbycao/antigravity-boot/releases/tag/v1.0.0) 下载。
 
@@ -81,7 +83,7 @@ open "$install_app"
 3. 选择目标应用和启动动画。公开标准版内置 4 秒「星轨」。选择「选择本地视频…」，再点击「启动」，即可使用自己的 MP4。推荐 H.264 视频。自选视频按原路径保存，请保留该文件。
 4. 两个目标应用分别记住动画选择。勾选「以后直接启动选中的应用」可跳过选择窗口。按住 **Option** 打开启动器，直到选择窗口出现，即可更改。
 
-1.0.0 的安装包采用本地临时签名，尚未获 Apple 公证。从网上下载时，macOS 可能提示无法验证开发者。首次打开时可参阅 [Apple 的 Mac 应用安全说明](https://support.apple.com/zh-cn/102445)。
+Mac 安装包采用本地临时签名，尚未获 Apple 公证。从网上下载时，macOS 可能提示无法验证开发者。首次打开时可参阅 [Apple 的 Mac 应用安全说明](https://support.apple.com/zh-cn/102445)。
 
 在 Mac 的选择窗口中，点「预览动画」可播放当前影片，点「返回设置」继续选择。勾选「从原 App 启动时播放动画」后，点「仅保存」或「启动」生效。Gemini 和 Antigravity 分别保存这个开关。完全退出所选 App 后，下次从 Dock、启动台或 Finder 打开它时会播放动画；切换到已运行的窗口不会触发。首次开启时，macOS 可能要求在系统设置的「登录项」中允许后台运行。关闭最后一个目标的开关并保存后，后台监听会注销。
 
