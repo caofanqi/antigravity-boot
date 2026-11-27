@@ -4,7 +4,7 @@
 
 **下载 v1.0.0**　[GitHub Release](https://github.com/caofanqi/antigravity-boot/releases/tag/v1.0.0) · [Gitee 发行版](https://gitee.com/bobbycao/antigravity-boot/releases/tag/v1.0.0)
 
-登录有仓库权限的账号，在发行页附件中选择 Windows x64 的 ZIP 或 Mac 的通用 DMG（Apple Silicon 和 Intel）。两款均内置四段角色动画。
+在发行页附件中选择 Windows x64 的 ZIP 或 Mac 的通用 DMG（Apple Silicon 和 Intel）。两款均内置四段角色动画。
 
 **macOS**　启动器在播放视频的同时打开目标应用。Antigravity 的窗口在片尾逐渐显现，Gemini 的动画向窗口中央收拢。点击「跳过」、按 Esc 或 ⌘.，可以提前进入应用。
 
@@ -12,7 +12,7 @@
 
 适用于 Windows 10/11 x64，需要 .NET Framework 4.8 和系统媒体播放组件。
 
-1. 登录仓库后，下载 [Windows x64 便携包](downloads/Antigravity-Boot-Windows-x64.zip)（文件页点 Download 或「下载」）。完整解压 ZIP 到一个固定文件夹，双击里面的 **Antigravity Boot.exe**。也可以给这个 EXE 创建桌面快捷方式。
+1. 下载 [Windows x64 便携包](downloads/Antigravity-Boot-Windows-x64.zip)（文件页点 Download 或「下载」，也可从发行页附件下载）。完整解压 ZIP 到一个固定文件夹，双击里面的 **Antigravity Boot.exe**。也可以给这个 EXE 创建桌面快捷方式。
 2. 选 **Gemini** 或 **Antigravity**，再选经典版、水彩绘本、霓虹都市或换班，点「启动」。启动器分别记住两个目标上次使用的动画。
 3. Antigravity 使用本机客户端。若自动查找失败，在文件选择框里找到安装目录下的 `Antigravity.exe`。Gemini 优先使用可识别的 `Gemini.exe`，找不到时用 Microsoft Edge 打开独立的 Gemini 网页窗口。该窗口使用单独的浏览器资料，首次使用可能需要登录，后续会保留登录状态。
 4. 动画末尾会对齐检测到的目标窗口并在约 1.25 秒内淡出。应用打开较慢时，动画会在片尾最多等待 10 秒；随时可按 **Esc** 或点「跳过」。仅打开这个启动器时播放动画。
@@ -36,13 +36,13 @@ dotnet msbuild Windows/AntigravityBoot.csproj -t:PackageWindows -p:Configuration
 
 > 请帮我把 https://github.com/caofanqi/antigravity-boot 安装到这台 Mac，按 README 安装带「经典版、水彩绘本、霓虹都市、换班」四款动画的版本，装好后打开启动器。如果 GitHub 访问不了，请改用 https://gitee.com/bobbycao/antigravity-boot 。需要我登录或确认系统安装时告诉我。
 
-**只发链接也可以。** 把 [GitHub 仓库](https://github.com/caofanqi/antigravity-boot) 或 [Gitee 仓库](https://gitee.com/bobbycao/antigravity-boot) 发给助手；如果它询问你想做什么，回复「帮我装到这台 Mac」。仓库设为私有期间，你的账号需要有其中一个仓库的读取权限。
+**只发链接也可以。** 把 [GitHub 仓库](https://github.com/caofanqi/antigravity-boot) 或 [Gitee 仓库](https://gitee.com/bobbycao/antigravity-boot) 发给助手；如果它询问你想做什么，回复「帮我装到这台 Mac」。
 
 ### 给执行安装的 AI
 
 1. 确认用户要安装到当前 Mac，系统为 macOS 13 或更高版本，并检查是否已安装 Antigravity 或 Gemini，至少需要其中一个。如果用户提供了本项目的录屏版 DMG，直接按下节安装；只有仓库链接时走源码构建。
 2. 检查 Git 和 Swift 编译器（`git --version`、`xcrun --find swiftc`）。缺少开发工具时，运行 `xcode-select --install`，请用户完成系统安装窗口后继续。
-3. 在新的临时目录中用 `git clone` 克隆用户所选的仓库，进入仓库根目录。私有仓库可使用用户已配置的 Git 凭据或 SSH。若两个地址都没有读取权限，提示用户申请访问或取得录屏版 DMG。
+3. 在新的临时目录中用 `git clone` 克隆用户所选的仓库，进入仓库根目录。若其中一个仓库网络不可达，可改用另一个镜像地址或从发行页下载 DMG。
 4. 执行下列命令构建、安装并打开四款动画版。默认装在当前用户的「应用程序」目录，无需管理员权限。若目标路径已有同名应用，先核对它是否为本项目，再和用户确认更新。
 
 ```sh
