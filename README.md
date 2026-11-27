@@ -14,29 +14,19 @@
 
 开源不易，喜欢这个启动器的话，来抖音关注支持一下。**[抖音 · 波子哥（BobbyCao）](https://www.douyin.com/user/MS4wLjABAAAAqfTLdIWYEIvollbyqL6yeU2anTbgSXkD_2-N-FNuztk)**
 
-<details>
-<summary>查看抖音二维码</summary>
-
 <img src="docs/social/douyin.png" width="240" alt="波子哥的抖音主页二维码">
-
-</details>
 
 | 平台 | 主页 | 二维码名片 |
 | --- | --- | --- |
-| B 站 | [波子哥Bobby](https://b23.tv/X2NEjU0) | [查看二维码](docs/social/bilibili.png) |
-| 小红书 | [波子哥 · 1140612912](https://www.xiaohongshu.com/user/profile/609b1a310000000001006e90) | [查看二维码](docs/social/xiaohongshu.jpg) |
-| 快手 | [波子哥 · 2319178813](https://v.kuaishou.com/f/YgB4QAlJD) | [查看二维码](docs/social/kuaishou.jpg) |
+| B 站 | [波子哥Bobby](https://b23.tv/X2NEjU0) | <img src="docs/social/bilibili.png" width="160" alt="波子哥Bobby 的 B 站主页二维码"> |
+| 小红书 | [波子哥 · 1140612912](https://www.xiaohongshu.com/user/profile/609b1a310000000001006e90) | <img src="docs/social/xiaohongshu.jpg" width="300" alt="波子哥的小红书名片"> |
+| 快手 | [波子哥 · 2319178813](https://v.kuaishou.com/f/YgB4QAlJD) | <img src="docs/social/kuaishou.jpg" width="200" alt="波子哥的快手名片"> |
 
 ### ☕ 请波子哥喝杯咖啡
 
 开源不易，支持一杯咖啡，给牛马上上动力！
 
-<details>
-<summary>查看微信赞赏码</summary>
-
 <img src="docs/social/wechat-tip.png" width="240" alt="波子哥的微信赞赏码">
-
-</details>
 
 ## Windows 便携版
 
